@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Upload Video - CricketGuard AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f4f5f7;
+            --surface: #ffffff;
+            --border: #e2e5eb;
+            --accent: #5b52e8;
+            --accent-hover: #4840d4;
+            --accent-light: #eeedfb;
+            --text-primary: #1a1d23;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --warning-bg: #fffbeb;
+            --warning-border: #f59e0b;
+            --warning-text: #92400e;
+            --success: #10b981;
+            --radius: 14px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── NAV ── */
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-brand span { font-size: 1.2rem; }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-history {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-history:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .btn-history svg { width: 14px; height: 14px; }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* ── MAIN ── */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 52px 24px 60px;
+            gap: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .page-header h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .page-header p {
+            margin-top: 6px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        /* ── SHOT SELECT ── */
+        .field-group {
+            margin-bottom: 20px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 11px 40px 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.92rem;
+            color: var(--text-primary);
+            background: var(--surface);
+            appearance: none;
+            cursor: pointer;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+        }
+
+        .select-wrapper select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(91,82,232,0.12);
+        }
+
+        .select-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* ── DROP ZONE ── */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 56px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: #fafbfc;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .drop-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--bg);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            transition: background 0.2s;
+        }
+
+        .drop-zone:hover .drop-icon, .drop-zone.drag-over .drop-icon {
+            background: #dddaf9;
+        }
+
+        .drop-icon svg {
+            width: 26px;
+            height: 26px;
+            color: var(--accent);
+        }
+
+        .drop-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .drop-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .btn-browse {
+            margin-top: 4px;
+            padding: 10px 26px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            position: relative;
+            z-index: 2;
+            pointer-events: none; /* click goes to input */
+        }
+
+        .drop-zone:hover .btn-browse {
+            background: var(--accent-hover);
+        }
+
+        .drop-formats {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ── FILE SELECTED STATE ── */
+        .file-selected-banner {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: #edf9f3;
+            border: 1.5px solid #6ee7b7;
+            border-radius: 10px;
+            margin-top: 16px;
+        }
+
+        .file-selected-banner.visible { display: flex; }
+
+        .file-selected-banner svg { color: var(--success); flex-shrink: 0; }
+
+        .file-info { flex: 1; min-width: 0; }
+        .file-name {
+            font-weight: 600;
+            font-size: 0.88rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #065f46;
+        }
+        .file-size { font-size: 0.78rem; color: #6ee7b7; margin-top: 2px; color: #059669; }
+
+        .btn-clear {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            transition: color 0.15s;
+        }
+        .btn-clear:hover { color: #ef4444; }
+
+        /* ── ANALYZE BUTTON ── */
+        .btn-analyze {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 11px;
+            font-family: 'Sora', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 14px rgba(91,82,232,0.35);
+        }
+
+        .btn-analyze:active:not(:disabled) { transform: scale(0.99); }
+
+        .btn-analyze:disabled {
+            background: #c7c4f3;
+            cursor: not-allowed;
+        }
+
+        .btn-analyze.loading .btn-text { display: none; }
+        .btn-analyze .btn-loading { display: none; align-items: center; gap: 8px; }
+        .btn-analyze.loading .btn-loading { display: flex; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2.5px solid rgba(255,255,255,0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* ── STATUS ── */
+        #status {
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-align: center;
+            min-height: 20px;
+            font-weight: 500;
+        }
+
+        /* ── TIPS ── */
+        .tips-card {
+            background: var(--warning-bg);
+            border-left: 4px solid var(--warning-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        .tips-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--warning-text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tips-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tips-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #78350f;
+        }
+
+        .tip-check {
+            width: 16px;
+            height: 16px;
+            color: var(--warning-border);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            nav { padding: 0 16px; }
+            main { padding: 32px 16px 48px; }
+            .card, .tips-card { padding: 20px; }
+            .drop-zone { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a class="nav-brand" href="#">
+        <span>🏏</span> Batsman Risk Analysis
+    </a>
+    <div class="nav-right">
+        <button class="btn-history" onclick="history.back()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>
+            </svg>
+            History
+        </button>
+        <div class="avatar" title="User">U</div>
+    </div>
+</nav>
+
+<main>
+    <div class="page-header">
+        <h1>Upload Batting Video</h1>
+        <p>Upload your batting video for AI-powered injury risk analysis</p>
+    </div>
+
+    <div class="card">
+        <!-- Shot type selector -->
+        <div class="field-group">
+            <label class="field-label" for="shot">Shot Type</label>
+            <div class="select-wrapper">
+                <select id="shot">
+                    <option value="Cover Drive">Cover Drive</option>
+                    <option value="Pull Shot">Pull Shot</option>
+                    <option value="Straight Drive">Straight Drive</option>
+                    <option value="Cut Shot">Cut Shot</option>
+                    <option value="Hook Shot">Hook Shot</option>
+                    <option value="Sweep Shot">Sweep Shot</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Drop zone -->
+        <div class="drop-zone" id="dropZone">
+            <input type="file" id="videoFile" accept="video/mp4,video/avi,video/mov,video/x-matroska,.mp4,.avi,.mov,.mkv">
+            <div class="drop-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="3"/>
+                    <polygon points="10 8 16 12 10 16 10 8"/>
+                </svg>
+            </div>
+            <div class="drop-title">Drop your video here</div>
+            <div class="drop-sub">or click to browse from your device</div>
+            <div class="btn-browse">Browse Files</div>
+            <div class="drop-formats">Supported formats: MP4, AVI, MOV, MKV (Max 500MB)</div>
+        </div>
+
+        <!-- File selected banner -->
+        <div class="file-selected-banner" id="fileBanner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <div class="file-info">
+                <div class="file-name" id="fileName">—</div>
+                <div class="file-size" id="fileSize">—</div>
+            </div>
+            <button class="btn-clear" id="clearBtn" title="Remove file">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <p id="status"></p>
+
+        <button class="btn-analyze" id="analyzeBtn" onclick="uploadVideo()">
+            <span class="btn-text">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Analyze Video
+            </span>
+            <span class="btn-loading">
+                <span class="spinner"></span>
+                Analyzing…
+            </span>
+        </button>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-card">
+        <div class="tips-title">
+            <span>💡</span> Tips for Best Results
+        </div>
+        <ul class="tips-list">
+            <li>
+                <svg class="tip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Ensure the entire body is visible in the frame
+            </li>
+            <li>
+                <svg class="tip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Use good lighting conditions
+            </li>
+            <li>
+                <svg class="tip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Maintain a steady camera position (side angle preferred)
+            </li>
+            <li>
+                <svg class="tip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Video should be at least 5 seconds long
+            </li>
+            <li>
+                <svg class="tip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Higher resolution videos provide better analysis
+            </li>
+        </ul>
+    </div>
+</main>
+
+<script>
+    const BACKEND = "http://127.0.0.1:5000";
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = document.getElementById("videoFile");
+    const fileBanner = document.getElementById("fileBanner");
+    const fileName = document.getElementById("fileName");
+    const fileSize = document.getElementById("fileSize");
+    const clearBtn = document.getElementById("clearBtn");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const status = document.getElementById("status");
+
+    function formatBytes(bytes) {
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    }
+
+    function showFile(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatBytes(file.size);
+        fileBanner.classList.add("visible");
+        status.textContent = "";
+    }
+
+    function clearFile() {
+        fileInput.value = "";
+        fileBanner.classList.remove("visible");
+        status.textContent = "";
+    }
+
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files[0]) showFile(fileInput.files[0]);
+    });
+
+    clearBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        clearFile();
+    });
+
+    // Drag & drop
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("drag-over");
+    });
+    ["dragleave", "dragend"].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.remove("drag-over")));
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("video/")) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            showFile(file);
+        } else {
+            status.textContent = "Please drop a valid video file.";
+        }
+    });
+
+    async function uploadVideo() {
+        const file = fileInput.files[0];
+        const shot = document.getElementById("shot").value;
+
+        if (!file) {
+            status.textContent = "⚠️ Please select a video file first.";
+            return;
+        }
+
+        analyzeBtn.classList.add("loading");
+        analyzeBtn.disabled = true;
+        status.textContent = "";
+
+        const formData = new FormData();
+        formData.append("video", file);
+        formData.append("shot", shot);
+
+        try {
+            const res = await fetch(`${BACKEND}/analyze`, {
+                method: "POST",
+                body: formData
+            });
+            const data = await res.json();
+            sessionStorage.setItem("reportData", JSON.stringify(data));
+            window.location.href = "report.html";
+        } catch (error) {
+            console.error(error);
+            status.textContent = "⚠️ Error connecting to server. Please try again.";
+        } finally {
+            analyzeBtn.classList.remove("loading");
+            analyzeBtn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Analysis History - Batsman Risk Analysis</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #1a1e35;
+            --bg2: #1f2440;
+            --surface: #242946;
+            --surface2: #2c3358;
+            --border: rgba(255,255,255,0.07);
+            --accent: #e8365d;
+            --accent2: #ff6b35;
+            --blue: #4d7cfe;
+            --green: #22c55e;
+            --yellow: #f59e0b;
+            --orange: #f97316;
+            --red: #ef4444;
+            --text: #e8ecf4;
+            --text-2: #8b92b3;
+            --text-3: #555e88;
+            --radius: 12px;
+            --shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── NAV ── */
+        nav {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .nav-brand {
+            font-family: 'Sora', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-new {
+            padding: 7px 16px;
+            background: var(--accent);
+            color: #fff;
+            border: none; border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; transition: opacity 0.15s;
+            text-decoration: none; display: flex; align-items: center; gap: 5px;
+        }
+        .btn-new:hover { opacity: 0.85; }
+
+        /* ── LAYOUT ── */
+        .page { max-width: 760px; margin: 0 auto; padding: 32px 20px 60px; }
+
+        /* ── HEADER ── */
+        .page-title { font-family: 'Sora', sans-serif; font-size: 1.35rem; font-weight: 700; }
+        .page-sub { font-size: 0.82rem; color: var(--text-2); margin-top: 4px; }
+
+        /* ── STAT CARDS ── */
+        .stat-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+            margin-top: 24px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            transition: transform 0.15s;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; margin-bottom: 10px;
+        }
+        .stat-icon.blue { background: rgba(77,124,254,0.15); }
+        .stat-icon.green { background: rgba(34,197,94,0.15); }
+        .stat-icon.yellow { background: rgba(245,158,11,0.15); }
+        .stat-icon.purple { background: rgba(168,85,247,0.15); }
+        .stat-value { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 800; line-height: 1; }
+        .stat-label { font-size: 0.73rem; color: var(--text-2); margin-top: 4px; }
+
+        /* ── CHART CARD ── */
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 20px 16px;
+            margin-top: 16px;
+        }
+        .chart-title { font-family: 'Sora', sans-serif; font-size: 0.9rem; font-weight: 700; }
+        .chart-sub { font-size: 0.75rem; color: var(--text-2); margin-top: 3px; }
+        .chart-wrap { margin-top: 16px; height: 140px; position: relative; }
+
+        /* ── FILTERS ── */
+        .filters {
+            display: grid; grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 10px; align-items: end;
+            margin-top: 16px;
+        }
+        .filter-group label {
+            display: block; font-size: 0.72rem; color: var(--text-2);
+            text-transform: uppercase; letter-spacing: 0.4px;
+            margin-bottom: 5px; font-weight: 600;
+        }
+        .filter-select {
+            position: relative;
+        }
+        .filter-select select {
+            width: 100%; padding: 8px 32px 8px 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+            appearance: none; cursor: pointer; outline: none;
+            transition: border-color 0.15s;
+        }
+        .filter-select select:focus { border-color: var(--accent); }
+        .filter-select::after {
+            content: ''; position: absolute; right: 11px; top: 50%;
+            transform: translateY(-50%);
+            border-left: 4px solid transparent; border-right: 4px solid transparent;
+            border-top: 5px solid var(--text-2); pointer-events: none;
+        }
+        .btn-apply {
+            padding: 8px 18px;
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+            height: 36px;
+        }
+        .btn-apply:hover { opacity: 0.85; }
+
+        /* ── SESSIONS PANEL ── */
+        .sessions-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-top: 16px; overflow: hidden;
+        }
+        .sessions-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sessions-title { font-family: 'Sora', sans-serif; font-size: 0.88rem; font-weight: 700; }
+        .header-actions { display: flex; gap: 8px; }
+        .btn-sm {
+            padding: 5px 12px; border-radius: 7px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 600;
+            cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+        }
+        .btn-sm.danger { background: var(--accent); color: #fff; }
+        .btn-sm.outline { background: transparent; border-color: var(--border); color: var(--text-2); }
+        .btn-sm.outline:hover { border-color: var(--text-2); color: var(--text); }
+
+        /* ── SESSION CARD ── */
+        .session-card {
+            padding: 14px 18px; border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        .session-card:last-child { border-bottom: none; }
+        .session-card:hover { background: rgba(255,255,255,0.02); }
+        .session-card.active { background: rgba(232,54,93,0.05); border-left: 3px solid var(--accent); }
+
+        .session-top { display: flex; align-items: center; justify-content: space-between; }
+        .session-name { font-family: 'Sora', sans-serif; font-size: 0.84rem; font-weight: 600; }
+        .risk-badge {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.3px;
+        }
+        .risk-badge.high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        .risk-badge.medium { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .risk-badge.low { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+
+        .session-meta {
+            display: flex; gap: 14px; margin-top: 5px; flex-wrap: wrap;
+        }
+        .meta-item {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 0.74rem; color: var(--text-2);
+        }
+        .meta-item svg { width: 11px; height: 11px; opacity: 0.6; }
+
+        .session-stats {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 8px; margin-top: 12px;
+        }
+        .sstat { }
+        .sstat-label { font-size: 0.68rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.3px; }
+        .sstat-value { font-family: 'Sora', sans-serif; font-size: 0.95rem; font-weight: 700; margin-top: 2px; }
+        .sstat-value.red { color: #f87171; }
+        .sstat-value.yellow { color: #fbbf24; }
+        .sstat-value.green { color: #4ade80; }
+        .sstat-value.blue { color: #60a5fa; }
+
+        .session-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-action {
+            padding: 6px 14px; border-radius: 7px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 600;
+            cursor: pointer; border: none; transition: all 0.15s;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .btn-action.primary { background: var(--accent); color: #fff; }
+        .btn-action.primary:hover { opacity: 0.85; }
+        .btn-action.ghost { background: var(--surface2); color: var(--text-2); }
+        .btn-action.ghost:hover { color: var(--text); }
+
+        /* ── REPORT VIEW ── */
+        #reportView { display: none; }
+        .report-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+        }
+        .report-badge-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+        .risk-circle {
+            width: 72px; height: 72px; border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 3px solid;
+        }
+        .risk-circle.high { border-color: #f87171; background: rgba(239,68,68,0.1); }
+        .risk-circle.medium { border-color: #fbbf24; background: rgba(245,158,11,0.1); }
+        .risk-circle.low { border-color: #4ade80; background: rgba(34,197,94,0.1); }
+        .risk-circle .rc-score { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 800; }
+        .risk-circle .rc-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); }
+
+        .detail-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 16px; }
+        .detail-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+        }
+        .detail-card-label { font-size: 0.72rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+        .detail-card-value { font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; }
+
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border-radius: 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text-2); font-size: 0.82rem; font-weight: 500;
+            cursor: pointer; transition: all 0.15s; text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-back:hover { color: var(--text); border-color: var(--text-2); }
+
+        @media (max-width: 600px) {
+            .stat-grid { grid-template-columns: repeat(2,1fr); }
+            .filters { grid-template-columns: 1fr 1fr; }
+            .session-stats { grid-template-columns: repeat(2,1fr); }
+            .detail-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a class="nav-brand" href="#">🏏 Batsman Risk Analysis</a>
+    <a class="btn-new" href="upload.html">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Analysis
+    </a>
+</nav>
+
+<div class="page">
+
+    <!-- ══ REPORT VIEW (shown when redirected from upload) ══ -->
+    <div id="reportView">
+        <div style="margin-bottom:20px">
+            <button class="btn-back" onclick="showHistory()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                Back to History
+            </button>
+        </div>
+        <div class="report-header">
+            <div>
+                <div class="page-title">Analysis Report</div>
+                <div class="page-sub" id="rpt-meta">—</div>
+                <div class="report-badge-row">
+                    <div class="risk-circle" id="rpt-circle">
+                        <span class="rc-score" id="rpt-score">—</span>
+                        <span class="rc-label">Risk</span>
+                    </div>
+                    <div>
+                        <div style="font-family:'Sora',sans-serif;font-size:1rem;font-weight:700" id="rpt-level">—</div>
+                        <div style="font-size:0.78rem;color:var(--text-2);margin-top:3px" id="rpt-shot">—</div>
+                    </div>
+                </div>
+            </div>
+            <a class="btn-new" href="upload.html">Analyze Another</a>
+        </div>
+
+        <div class="detail-grid" id="rpt-details"></div>
+
+        <div style="margin-top:24px;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+            <div style="font-family:'Sora',sans-serif;font-size:0.85rem;font-weight:700;margin-bottom:10px">Recommendations</div>
+            <div id="rpt-recommendations" style="font-size:0.84rem;color:var(--text-2);line-height:1.7"></div>
+        </div>
+    </div>
+
+    <!-- ══ HISTORY VIEW ══ -->
+    <div id="historyView">
+        <div class="page-title">Analysis History</div>
+        <div class="page-sub">Track your progress and review high-risk assessments</div>
+
+        <!-- Stat cards -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">📊</div>
+                <div class="stat-value" id="s-total">8</div>
+                <div class="stat-label">Total Analyses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">🎯</div>
+                <div class="stat-value" id="s-avg">38</div>
+                <div class="stat-label">Average Risk Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon yellow">⚠️</div>
+                <div class="stat-value" id="s-high">1</div>
+                <div class="stat-label">High Risk Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">📈</div>
+                <div class="stat-value" id="s-low">1</div>
+                <div class="stat-label">Best Score Last</div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-card">
+            <div class="chart-title">Risk Score Trend</div>
+            <div class="chart-sub">Risk scores over your last analyses</div>
+            <div class="chart-wrap">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>Shot Type</label>
+                <div class="filter-select">
+                    <select id="filterShot">
+                        <option value="">All Shots</option>
+                        <option>Cover Drive</option>
+                        <option>Pull Shot</option>
+                        <option>Straight Drive</option>
+                        <option>Cut Shot</option>
+                        <option>Hook Shot</option>
+                        <option>Sweep Shot</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Risk Level</label>
+                <div class="filter-select">
+                    <select id="filterRisk">
+                        <option value="">All Levels</option>
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Date Range</label>
+                <div class="filter-select">
+                    <select id="filterDate">
+                        <option>All Time</option>
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                        <option>This Month</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-apply" onclick="applyFilters()">Apply Filter</button>
+        </div>
+
+        <!-- Sessions -->
+        <div class="sessions-panel">
+            <div class="sessions-header">
+                <div class="sessions-title">Recent Analyses</div>
+                <div class="header-actions">
+                    <button class="btn-sm danger">🗑 Clear</button>
+                    <button class="btn-sm outline">⬇ Export</button>
+                </div>
+            </div>
+            <div id="sessionsList"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ── MOCK DATA ──
+const SESSIONS = [
+    { id:1, name:"batting_session_1.mp4", date:"Nov 01, 2024", time:"11:24", shot:"Cover Drive", risk:"High",  score:82, knee:82, back:75, shoulder:38, head:38, active:true },
+    { id:2, name:"batting_session_2.mp4", date:"Nov 01, 2024", time:"10:14", shot:"Pull Shot",   risk:"Medium",score:56, knee:88, back:53, shoulder:77, head:86 },
+    { id:3, name:"batting_session_3.mp4", date:"Nov 01, 2024", time:"09:55", shot:"Straight Drive",risk:"Low",score:30, knee:46, back:44, shoulder:8,  head:86 },
+    { id:4, name:"batting_session_4.mp4", date:"Nov 01, 2024", time:"09:12", shot:"Cover Drive", risk:"Medium",score:61, knee:69, back:44, shoulder:9,  head:9 },
+    { id:5, name:"batting_session_5.mp4", date:"Nov 01, 2024", time:"08:55", shot:"Pull Shot",   risk:"Low",   score:28, knee:67, back:38, shoulder:44, head:12 },
+    { id:6, name:"batting_session_6.mp4", date:"Oct 31, 2024", time:"17:30", shot:"Cut Shot",    risk:"Low",   score:18, knee:46, back:4,  shoulder:30, head:86 },
+    { id:7, name:"batting_session_7.mp4", date:"Oct 31, 2024", time:"16:44", shot:"Hook Shot",   risk:"Medium",score:54, knee:72, back:31, shoulder:60, head:22 },
+    { id:8, name:"batting_session_8.mp4", date:"Oct 30, 2024", time:"14:20", shot:"Sweep Shot",  risk:"Low",   score:22, knee:35, back:18, shoulder:12, head:44 },
+];
+
+function riskClass(r) { return r.toLowerCase(); }
+function scoreColor(v) {
+    if (v >= 70) return 'red';
+    if (v >= 45) return 'yellow';
+    if (v >= 25) return 'blue';
+    return 'green';
+}
+
+function renderSessions(data) {
+    const el = document.getElementById('sessionsList');
+    if (!data.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-2)">No sessions match the filter.</div>'; return; }
+    el.innerHTML = data.map(s => `
+        <div class="session-card ${s.active ? 'active' : ''}">
+            <div class="session-top">
+                <div class="session-name">${s.name}</div>
+                <span class="risk-badge ${riskClass(s.risk)}">${s.risk} Risk</span>
+            </div>
+            <div class="session-meta">
+                <span class="meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    ${s.date}
+                </span>
+                <span class="meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    ${s.time}
+                </span>
+                <span class="meta-item">🏏 ${s.shot}</span>
+            </div>
+            <div class="session-stats">
+                <div class="sstat"><div class="sstat-label">Risk Score</div><div class="sstat-value ${scoreColor(s.score)}">${s.score}%</div></div>
+                <div class="sstat"><div class="sstat-label">Knee Risk</div><div class="sstat-value ${scoreColor(s.knee)}">${s.knee}%</div></div>
+                <div class="sstat"><div class="sstat-label">Back Risk</div><div class="sstat-value ${scoreColor(s.back)}">${s.back}%</div></div>
+                <div class="sstat"><div class="sstat-label">Shoulder</div><div class="sstat-value ${scoreColor(s.shoulder)}">${s.shoulder}%</div></div>
+            </div>
+            <div class="session-actions">
+                <button class="btn-action primary" onclick="viewReport(${s.id})">📋 View Report</button>
+                <button class="btn-action ghost">⬇ Download</button>
+                <button class="btn-action ghost">🗑 Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function applyFilters() {
+    const shot = document.getElementById('filterShot').value;
+    const risk = document.getElementById('filterRisk').value;
+    let filtered = SESSIONS;
+    if (shot) filtered = filtered.filter(s => s.shot === shot);
+    if (risk) filtered = filtered.filter(s => s.risk === risk);
+    renderSessions(filtered);
+}
+
+// ── CHART ──
+function renderChart() {
+    const scores = SESSIONS.map(s => s.score);
+    const labels = SESSIONS.map(s => s.name.replace('batting_session_','S').replace('.mp4',''));
+    const colors = scores.map(v => v >= 70 ? 'rgba(239,68,68,0.85)' : v >= 45 ? 'rgba(245,158,11,0.85)' : 'rgba(34,197,94,0.75)');
+
+    new Chart(document.getElementById('trendChart'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                data: scores,
+                backgroundColor: colors,
+                borderRadius: 5,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` Risk: ${ctx.raw}%` } } },
+            scales: {
+                x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555e88', font: { size: 10 } } },
+                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555e88', font: { size: 10 }, callback: v => v + '%' }, max: 100, min: 0 }
+            }
+        }
+    });
+}
+
+// ── STATS ──
+function updateStats() {
+    const scores = SESSIONS.map(s => s.score);
+    document.getElementById('s-total').textContent = SESSIONS.length;
+    document.getElementById('s-avg').textContent = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+    document.getElementById('s-high').textContent = SESSIONS.filter(s=>s.risk==='High').length;
+    document.getElementById('s-low').textContent = Math.min(...scores);
+}
+
+// ── REPORT DETAIL VIEW ──
+function viewReport(id) {
+    const s = SESSIONS.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('rpt-meta').textContent = `${s.date} · ${s.time} · ${s.shot}`;
+    const circle = document.getElementById('rpt-circle');
+    circle.className = 'risk-circle ' + riskClass(s.risk);
+    document.getElementById('rpt-score').textContent = s.score;
+    document.getElementById('rpt-level').textContent = s.risk + ' Risk';
+    document.getElementById('rpt-shot').textContent = '🏏 ' + s.shot;
+
+    document.getElementById('rpt-details').innerHTML = `
+        <div class="detail-card"><div class="detail-card-label">Knee Risk</div><div class="detail-card-value" style="color:${s.knee>=70?'#f87171':s.knee>=45?'#fbbf24':'#4ade80'}">${s.knee}%</div></div>
+        <div class="detail-card"><div class="detail-card-label">Back Risk</div><div class="detail-card-value" style="color:${s.back>=70?'#f87171':s.back>=45?'#fbbf24':'#4ade80'}">${s.back}%</div></div>
+        <div class="detail-card"><div class="detail-card-label">Shoulder Risk</div><div class="detail-card-value" style="color:${s.shoulder>=70?'#f87171':s.shoulder>=45?'#fbbf24':'#4ade80'}">${s.shoulder}%</div></div>
+        <div class="detail-card"><div class="detail-card-label">Head Risk</div><div class="detail-card-value" style="color:${s.head>=70?'#f87171':s.head>=45?'#fbbf24':'#4ade80'}">${s.head}%</div></div>
+        <div class="detail-card"><div class="detail-card-label">Shot Type</div><div class="detail-card-value" style="font-size:0.9rem">${s.shot}</div></div>
+        <div class="detail-card"><div class="detail-card-label">Overall Score</div><div class="detail-card-value" style="color:${s.score>=70?'#f87171':s.score>=45?'#fbbf24':'#4ade80'}">${s.score}%</div></div>
+    `;
+
+    const tips = {
+        High: '⚠️ High injury risk detected. Consider rest and consult a physiotherapist before next session. Focus on correcting body posture, especially knee alignment and back rotation.',
+        Medium: '🟡 Moderate risk. Warm up thoroughly and use protective gear. Work with a coach to refine technique in areas showing elevated stress.',
+        Low: '✅ Good session! Risk levels are manageable. Maintain consistent technique and continue your warm-up routine.'
+    };
+    document.getElementById('rpt-recommendations').textContent = tips[s.risk] || '—';
+
+    document.getElementById('historyView').style.display = 'none';
+    document.getElementById('reportView').style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+function showHistory() {
+    document.getElementById('reportView').style.display = 'none';
+    document.getElementById('historyView').style.display = 'block';
+}
+
+// ── INIT ──
+// Check if redirected from upload page with live data
+const reportData = sessionStorage.getItem('reportData');
+if (reportData) {
+    try {
+        const d = JSON.parse(reportData);
+        // Inject into SESSIONS as latest
+        SESSIONS.unshift({
+            id: 0, name: 'latest_analysis.mp4',
+            date: new Date().toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'}),
+            time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+            shot: d.shot || 'Unknown',
+            risk: d.risk_level || 'Medium',
+            score: d.risk_score || 0,
+            knee: d.knee_risk || 0, back: d.back_risk || 0,
+            shoulder: d.shoulder_risk || 0, head: d.head_risk || 0,
+            active: true
+        });
+        sessionStorage.removeItem('reportData');
+    } catch(e) {}
+}
+
+updateStats();
+renderSessions(SESSIONS);
+renderChart();
+</script>
+</body>
+</html>
