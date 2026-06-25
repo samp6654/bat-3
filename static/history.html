@@ -509,7 +509,8 @@
 
 <script>
 // ── SESSION STORAGE (localStorage-backed) ──
-const LS_KEY = 'batsmanHistory';
+const email = sessionStorage.getItem('userEmail') || 'guest';
+const LS_KEY = 'batsmanHistory_' + email;
 
 function loadSessions() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch(e) { return []; }

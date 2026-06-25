@@ -10,10 +10,8 @@ The feature vector matches exactly what final.ipynb trained on:
 """
 
 import os
-import cv2
 import numpy as np
 import pandas as pd
-import mediapipe as mp
 import joblib
 
 # ── Load XGBoost model artifacts ─────────────────────────────────────
@@ -41,7 +39,7 @@ def _load_artifacts():
 
 
 # ── MediaPipe setup ───────────────────────────────────────────────────
-mp_pose = mp.solutions.pose
+# (Lazy-loaded inside analyze_video)
 
 # Landmark indices (matching pose_data.csv column names)
 JOINTS = {
@@ -239,6 +237,10 @@ def _area_scores(shoulder_angle, hip_angle, back_rotation, lm):
 
 # ── Main entry point ──────────────────────────────────────────────────
 def analyze_video(video_path, shot="Unknown"):
+    import cv2
+    import mediapipe as mp
+    mp_pose = mp.solutions.pose
+
     has_model = _load_artifacts()
 
     pose = mp_pose.Pose(

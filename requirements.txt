@@ -7,3 +7,6 @@ pandas
 xgboost
 scikit-learn
 joblib
+flask-login
+authlib
+requests

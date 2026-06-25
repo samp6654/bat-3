@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Batsman Risk Analysis - Sign Up</title>
+  <meta name="description" content="Create your free Batsman AI account to unlock AI-powered cricket injury risk analysis."/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a1f4e;
+      --navy-mid: #232966;
+      --orange: #f97316;
+      --orange-dark: #ea580c;
+      --red-dark: #b91c1c;
+      --white: #ffffff;
+      --gray-100: #f3f4f6;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --input-border: #d1d5db;
+      --green: #16a34a;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ─── LEFT PANEL ─── */
+    .left-panel {
+      flex: 0 0 48%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 56px;
+      overflow: hidden;
+    }
+
+    .bg-img {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=1000&q=85');
+      background-size: cover;
+      background-position: center center;
+      z-index: 0;
+    }
+
+    .bg-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1a1f4e 0%, #2d3580 50%, #b45309 100%);
+      z-index: -1;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        155deg,
+        rgba(12, 15, 45, 0.88) 0%,
+        rgba(26, 31, 78, 0.80) 50%,
+        rgba(130, 45, 8, 0.75) 100%
+      );
+      z-index: 1;
+    }
+
+    .blob-top {
+      position: absolute;
+      top: -80px; left: -80px;
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 70%);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .blob-bottom {
+      position: absolute;
+      bottom: -100px; right: -60px;
+      width: 380px; height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 70%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .left-content {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    .brand-icon {
+      width: 54px; height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 4px 20px rgba(249,115,22,0.55);
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.3px;
+    }
+
+    .tagline {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.28;
+      margin-bottom: 18px;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    }
+
+    .description {
+      font-size: 15px;
+      color: rgba(255,255,255,0.82);
+      line-height: 1.7;
+      margin-bottom: 44px;
+      max-width: 380px;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+    }
+
+    .steps { display: flex; flex-direction: column; gap: 20px; }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .step:nth-child(1) { animation-delay: 0.2s; }
+    .step:nth-child(2) { animation-delay: 0.35s; }
+    .step:nth-child(3) { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 2px 12px rgba(249,115,22,0.45);
+    }
+
+    .step-text h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .step-text p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 2px;
+    }
+
+    /* ─── RIGHT PANEL ─── */
+    .right-panel {
+      flex: 1;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 64px;
+      overflow-y: auto;
+    }
+
+    .signup-card {
+      width: 100%;
+      max-width: 420px;
+      animation: fadeIn 0.5s ease 0.1s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .signup-card h2 {
+      font-size: 30px;
+      font-weight: 800;
+      color: #111827;
+      letter-spacing: -0.5px;
+      margin-bottom: 5px;
+    }
+
+    .signup-card .subtitle {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 28px;
+    }
+
+    /* Google button — full width, prominent */
+    .btn-google {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px;
+      border: 1.5px solid var(--input-border);
+      border-radius: 10px;
+      background: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      margin-bottom: 20px;
+    }
+    .btn-google:hover {
+      border-color: #4285f4;
+      background: #f8faff;
+      box-shadow: 0 2px 10px rgba(66,133,244,0.15);
+    }
+
+    .g-icon {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      color: var(--gray-400);
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--input-border);
+    }
+
+    .field-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-700);
+      margin-bottom: 7px;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap .icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 17px;
+      pointer-events: none;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      border: 1.5px solid var(--input-border);
+      border-radius: 10px;
+      font-size: 14.5px;
+      font-family: 'Nunito', sans-serif;
+      color: #111827;
+      background: #fafafa;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--navy-mid);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(35,41,102,0.1);
+    }
+
+    input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 17px;
+      user-select: none;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .password-toggle:hover { opacity: 0.9; }
+
+    /* Strength bar */
+    .strength-bar-wrap {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .strength-seg {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--input-border);
+      transition: background 0.3s;
+    }
+    .strength-seg.weak   { background: #ef4444; }
+    .strength-seg.medium { background: #f59e0b; }
+    .strength-seg.strong { background: #22c55e; }
+
+    .strength-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-top: 4px;
+      color: var(--gray-400);
+      transition: color 0.3s;
+    }
+    .strength-label.weak   { color: #ef4444; }
+    .strength-label.medium { color: #f59e0b; }
+    .strength-label.strong { color: #22c55e; }
+
+    .btn-signup {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      color: var(--white);
+      background: linear-gradient(90deg, var(--navy) 0%, var(--red-dark) 100%);
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+      box-shadow: 0 4px 18px rgba(26,31,78,0.3);
+      margin-top: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-signup:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 6px 24px rgba(26,31,78,0.45);
+      transform: translateY(-1px);
+    }
+    .btn-signup:active { transform: translateY(0); }
+    .btn-signup:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Toast notification */
+    #toast {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      animation: fadeIn 0.25s ease;
+    }
+    #toast.error   { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+    #toast.success { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+
+    .login-prompt {
+      text-align: center;
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-top: 22px;
+    }
+    .login-prompt a {
+      color: var(--orange);
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .login-prompt a:hover { text-decoration: underline; }
+
+    .terms {
+      font-size: 11.5px;
+      color: var(--gray-400);
+      text-align: center;
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 800px) {
+      .left-panel { display: none; }
+      .right-panel { padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="bg-img"></div>
+    <div class="overlay"></div>
+    <div class="blob-top"></div>
+    <div class="blob-bottom"></div>
+
+    <div class="left-content">
+      <div class="brand">
+        <div class="brand-icon">🏏</div>
+        <span class="brand-name">Batsman Risk Analysis</span>
+      </div>
+
+      <h1 class="tagline">Join the Team.<br>Play Smarter.<br>Stay Injury-Free.</h1>
+      <p class="description">
+        Create your free account and get instant access to AI-powered biomechanical analysis for every shot you play.
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h4>Create Your Account</h4>
+            <p>Sign up in seconds — free forever</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h4>Upload Your Video</h4>
+            <p>Any batting clip, any format</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h4>Get Your Risk Report</h4>
+            <p>Detailed injury-risk insights in seconds</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="signup-card">
+      <h2>Create Account</h2>
+      <p class="subtitle">Start your injury-free cricket journey today</p>
+
+      <!-- Google Sign-Up -->
+      <button class="btn-google" id="googleBtn" onclick="googleSignup()">
+        <svg class="g-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">OR SIGN UP WITH EMAIL</div>
+
+      <!-- Toast -->
+      <div id="toast"></div>
+
+      <!-- Form -->
+      <div class="field-group">
+        <label for="name">Full Name</label>
+        <div class="input-wrap">
+          <span class="icon">👤</span>
+          <input type="text" id="name" placeholder="Enter your full name" autocomplete="name" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrap">
+          <span class="icon">📧</span>
+          <input type="email" id="email" placeholder="Enter your email" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <span class="icon">🔒</span>
+          <input type="password" id="password" placeholder="Minimum 6 characters" autocomplete="new-password"
+                 oninput="checkStrength(this.value)" />
+          <span class="password-toggle" onclick="togglePwd('password', this)">👁</span>
+        </div>
+        <div class="strength-bar-wrap" id="strengthBars">
+          <div class="strength-seg" id="seg1"></div>
+          <div class="strength-seg" id="seg2"></div>
+          <div class="strength-seg" id="seg3"></div>
+          <div class="strength-seg" id="seg4"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel"></div>
+      </div>
+
+      <div class="field-group">
+        <label for="confirm">Confirm Password</label>
+        <div class="input-wrap">
+          <span class="icon">🔒</span>
+          <input type="password" id="confirm" placeholder="Re-enter your password" autocomplete="new-password" />
+          <span class="password-toggle" onclick="togglePwd('confirm', this)">👁</span>
+        </div>
+      </div>
+
+      <button class="btn-signup" id="signupBtn" onclick="handleSignup()">Create Account</button>
+
+      <p class="terms">
+        By signing up, you agree to our Terms of Service and Privacy Policy.
+      </p>
+
+      <p class="login-prompt">
+        Already have an account? <a href="login.html">Log In</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND = "";  // same origin
+
+    function showToast(msg, type = 'error') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = type;
+      t.style.display = 'block';
+      if (type === 'success') {
+        setTimeout(() => t.style.display = 'none', 3000);
+      }
+    }
+
+    function togglePwd(id, btn) {
+      const inp = document.getElementById(id);
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        inp.type = 'password';
+        btn.textContent = '👁';
+      }
+    }
+
+    function checkStrength(pwd) {
+      let score = 0;
+      if (pwd.length >= 6)  score++;
+      if (pwd.length >= 10) score++;
+      if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) score++;
+      if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+      const segs   = ['seg1','seg2','seg3','seg4'];
+      const labels = { 0:'', 1:'Weak', 2:'Fair', 3:'Good', 4:'Strong' };
+      const cls    = { 0:'', 1:'weak', 2:'medium', 3:'medium', 4:'strong' };
+
+      segs.forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.className = 'strength-seg';
+        if (i < score) el.classList.add(cls[score]);
+      });
+
+      const lbl = document.getElementById('strengthLabel');
+      lbl.textContent = pwd.length ? labels[score] : '';
+      lbl.className   = 'strength-label ' + (cls[score] || '');
+    }
+
+    function googleSignup() {
+      window.location.href = '/auth/google';
+    }
+
+    async function handleSignup() {
+      const name     = document.getElementById('name').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm').value;
+
+      // Clear previous errors
+      ['name','email','password','confirm'].forEach(id =>
+        document.getElementById(id).classList.remove('error')
+      );
+      document.getElementById('toast').style.display = 'none';
+
+      if (!name) {
+        document.getElementById('name').classList.add('error');
+        showToast('Please enter your full name.');
+        return;
+      }
+      if (!email || !email.includes('@')) {
+        document.getElementById('email').classList.add('error');
+        showToast('Please enter a valid email address.');
+        return;
+      }
+      if (password.length < 6) {
+        document.getElementById('password').classList.add('error');
+        showToast('Password must be at least 6 characters.');
+        return;
+      }
+      if (password !== confirm) {
+        document.getElementById('confirm').classList.add('error');
+        showToast('Passwords do not match.');
+        return;
+      }
+
+      const btn = document.getElementById('signupBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating Account…';
+
+      try {
+        const res  = await fetch(`${BACKEND}/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          // Store user info for immediate use in the app
+          sessionStorage.setItem('isLoggedIn', 'true');
+          sessionStorage.setItem('userEmail', data.user.email);
+          sessionStorage.setItem('userName', data.user.name);
+          sessionStorage.setItem('userAvatar', data.user.avatar || '');
+          showToast('Account created! Redirecting…', 'success');
+          setTimeout(() => window.location.href = 'video-upload.html', 800);
+        } else {
+          showToast(data.message || 'Sign-up failed. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Create Account';
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Could not connect to server. Is it running?');
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleSignup();
+    });
+  </script>
+</body>
+</html>

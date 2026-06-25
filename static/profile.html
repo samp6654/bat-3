@@ -352,8 +352,8 @@
 // Auth guard
 if (!sessionStorage.getItem('isLoggedIn')) window.location.href = 'login.html';
 
-const LS_KEY = 'batsmanHistory';
 const email = sessionStorage.getItem('userEmail') || '';
+const LS_KEY = 'batsmanHistory_' + email;
 const sinceKey = 'batsmanMemberSince_' + email;
 
 // Store member-since on first ever visit
